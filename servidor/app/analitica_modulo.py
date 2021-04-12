@@ -5,6 +5,8 @@ import os
 from sklearn.linear_model import LinearRegression
 import time
 import pika
+import paho.mqtt.client as mqtt
+import paho.mqtt.publish as publish
 
 class analitica():
     ventana = 10
@@ -12,6 +14,19 @@ class analitica():
     file_name = "data_base.csv"
     servidor = "52.22.75.246"
 
+    def on_connect(client, userdata, flags, rc):
+        print("Connected with result code "+str(rc))
+        client.subscribe("$SYS/#")
+
+    def on_message(client, userdata, msg):
+        print(msg.topic + " " + str(msg.payload))
+
+    client = mqtt.Client('Publicador_alerta')
+    client.on_connect = on_connect
+    client.on_message = on_message
+
+    client.connect(servidor, 1883, 60)
+    client.loop_start()
 
     def __init__(self) -> None:
         self.load_data()
