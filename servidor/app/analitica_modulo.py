@@ -71,8 +71,24 @@ class analitica():
         self.publicar("mean-{}".format(sensor), str(df_filtrado.mean(skipna = True)))
         self.publicar("median-{}".format(sensor), str(df_filtrado.median(skipna = True)))
         self.publicar("std-{}".format(sensor), str(df_filtrado.std(skipna = True)))
-        if str(df_filtrado.max(skipna = True))>"10":
-            self.publicar("alerta-{}".format(sensor), "falla")
+
+        if (("max-{}".format(sensor)=="max-EjeX".format(sensor)) and str(df_filtrado.max(skipna = True))>"70") or (("max-{}".format(sensor)=="max-EjeY".format(sensor)) and str(df_filtrado.max(skipna = True))>"70") or (("max-{}".format(sensor)=="max-EjeZ".format(sensor)) and str(df_filtrado.max(skipna = True))>"70"):
+            
+            self.publicar("alert-derrumbe".format(sensor), "Precaucion cambio abrupto")
+            publish.single('2/alert-derrumbe', "Precaucion cambio abrupto", hostname='52.22.75.246', client_id='alert')
+            
+        if (("min-{}".format(sensor)=="min-EjeX".format(sensor)) and str(df_filtrado.min(skipna = True))<"70") or (("min-{}".format(sensor)=="min-EjeY".format(sensor)) and str(df_filtrado.min(skipna = True))<"70") or (("min-{}".format(sensor)=="min-EjeZ".format(sensor)) and str(df_filtrado.min(skipna = True))<"70"):
+
+            self.publicar("alert-derrumbe".format(sensor), "Precaucion cambio abrupto")
+            publish.single('2/alert-derrumbe', "Precaucion cambio abrupto", hostname='52.22.75.246', client_id='alert')
+
+        if ("max-{}".format(sensor)=="max-humd_data".format(sensor)) and str(df_filtrado.max(skipna = True))>"70":
+            publish.single('2/alertahumd_data', "Humedad elevada", hostname='52.22.75.246', client_id='alert')
+            #self.publicar("alerta-humedad".format(sensor), "Humedad Elevada ")
+
+        if ("min-{}".format(sensor)=="min-humd_data".format(sensor)) and str(df_filtrado.min(skipna = True))<"60":
+            publish.single('2/alertahumd_data', "Humedad baja", hostname='52.22.75.246', client_id='alert')
+            #self.publicar("alerta-humd_data".format(sensor), "Humedad Muy Baja")
 
     def analitica_predictiva(self):
         self.regresion("temperatura")
