@@ -117,7 +117,8 @@ class analitica():
         for tiempo, prediccion in zip(nuevos_tiempos, Y_pred):
             time_format = datetime.utcfromtimestamp(tiempo)
             date_time = time_format.strftime('%d.%m.%Y %H:%M:%S')
-            self.publicar("prediccion-{}".format(sensor), "{}".format(prediccion[0]))
+            self.publicar("prediccion-{}".format(sensor), "{},{}".format(date_time,prediccion[0]))
+            self.publicar("prediccion_datos-{}".format(sensor), "{:.2f}".format(prediccion[0]))
     @staticmethod
     def publicar(cola, mensaje):
         connexion = pika.BlockingConnection(pika.ConnectionParameters(host='rabbit'))
