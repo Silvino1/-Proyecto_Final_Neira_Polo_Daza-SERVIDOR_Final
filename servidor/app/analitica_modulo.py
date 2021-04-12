@@ -90,9 +90,10 @@ class analitica():
             publish.single('2/alertahumd_data', "Humedad baja", hostname='52.22.75.246', client_id='alert')
             #self.publicar("alerta-humd_data".format(sensor), "Humedad Muy Baja")
 
-    def analitica_predictiva(self):
-        self.regresion("temperatura")
-        self.regresion("densidad")
+     def analitica_predictiva(self):
+        self.regresion("temp_data")
+        self.regresion("pres_data")
+        self.regresion("humd_data")
 
     def regresion(self, sensor):
         df_filtrado = self.df[self.df["sensor"] == sensor]
