@@ -10,7 +10,8 @@ class analitica():
     ventana = 10
     pronostico = 5
     file_name = "data_base.csv"
-    servidor = "20.84.105.98"
+    servidor = "52.22.75.246"
+
 
     def __init__(self) -> None:
         self.load_data()
