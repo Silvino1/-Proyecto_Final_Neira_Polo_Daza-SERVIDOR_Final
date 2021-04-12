@@ -55,8 +55,12 @@ class analitica():
         print(self.df)
 
     def analitica_descriptiva(self):
-        self.operaciones("temperatura")
-        self.operaciones("densidad")
+        self.operaciones("EjeX")
+        self.operaciones("EjeY")
+        self.operaciones("EjeZ")
+        self.operaciones("temp_data")
+        self.operaciones("pres_data")
+        self.operaciones("humd_data")
 
     def operaciones(self, sensor):
         df_filtrado = self.df[self.df["sensor"] == sensor]
