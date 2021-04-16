@@ -40,6 +40,7 @@ class analitica():
 
     def update_data(self, msj):
         msj_vetor = msj.split(",")
+        msj_vetor2= msj.split(",")
         now = datetime.now()
         date_time = now.strftime('%d.%m.%Y %H:%M:%S')
         new_data = {"fecha": date_time, "sensor": msj_vetor[0], "valor": float(msj_vetor[1])}
@@ -54,13 +55,18 @@ class analitica():
         self.df = self.df.append(new_data, ignore_index=True)
         new_data = {"fecha": date_time, "sensor": msj_vetor[10], "valor": float(msj_vetor[11])}
         self.df = self.df.append(new_data, ignore_index=True)
-        
+        new_data = {"fecha": date_time, "sensor": msj_vetor2[12], "valor": float(msj_vetor2[13])}
+        self.df = self.df.append(new_data, ignore_index=True)
+
+
         self.publicar("EjeX",msj_vetor[1])
         self.publicar("EjeY",msj_vetor[3])
         self.publicar("EjeZ",msj_vetor[5])
         self.publicar("temp_data",msj_vetor[7])
         self.publicar("pres_data",msj_vetor[9])
         self.publicar("humd_data",msj_vetor[11])
+        if (msj_vetor2[13]!="0"):
+            self.publicar("alerta",msj_vetor2[13])
 
         self.analitica_descriptiva()
         self.analitica_predictiva()
@@ -76,6 +82,7 @@ class analitica():
         self.operaciones("temp_data")
         self.operaciones("pres_data")
         self.operaciones("humd_data")
+        self.operaciones("alerta")
 
     def operaciones(self, sensor):
         df_filtrado = self.df[self.df["sensor"] == sensor]
@@ -87,25 +94,15 @@ class analitica():
         self.publicar("median-{}".format(sensor), str(df_filtrado.median(skipna = True)))
         self.publicar("std-{}".format(sensor), str(df_filtrado.std(skipna = True)))
 
-        if (("max-{}".format(sensor)=="max-EjeX".format(sensor)) and str(df_filtrado.max(skipna = True))>"70") or (("max-{}".format(sensor)=="max-EjeY".format(sensor)) and str(df_filtrado.max(skipna = True))>"70") or (("max-{}".format(sensor)=="max-EjeZ".format(sensor)) and str(df_filtrado.max(skipna = True))>"70"):
-            
-            self.publicar("alert-derrumbe".format(sensor), "Precaucion cambio abrupto")
-            publish.single('2/alert-derrumbe', "Precaucion cambio abrupto", hostname='52.22.75.246', client_id='alert')
-            
-        if (("min-{}".format(sensor)=="min-EjeX".format(sensor)) and str(df_filtrado.min(skipna = True))<"70") or (("min-{}".format(sensor)=="min-EjeY".format(sensor)) and str(df_filtrado.min(skipna = True))<"70") or (("min-{}".format(sensor)=="min-EjeZ".format(sensor)) and str(df_filtrado.min(skipna = True))<"70"):
+        if ("max-{}".format(sensor)=="max-alerta".format(sensor)) and str(df_filtrado.max(skipna = True))=="1.0":
+            self.publicar("alerta-derrumbe".format(sensor),"alerta de derrumbe")
 
-            self.publicar("alert-derrumbe".format(sensor), "Precaucion cambio abrupto")
-            publish.single('2/alert-derrumbe', "Precaucion cambio abrupto", hostname='52.22.75.246', client_id='alert')
+        if ("max-{}".format(sensor)=="max-humd_data".format(sensor)) and str(df_filtrado.max(skipna = True))>"95":
+            #publish.single('2/alertahumd_data', "Humedad elevada", hostname='52.22.75.246', client_id='alert')
+            self.publicar("alerta-humedad".format(sensor), "Humedad Elevada ")
 
-        if ("max-{}".format(sensor)=="max-humd_data".format(sensor)) and str(df_filtrado.max(skipna = True))>"70":
-            publish.single('2/alertahumd_data', "Humedad elevada", hostname='52.22.75.246', client_id='alert')
-            #self.publicar("alerta-humedad".format(sensor), "Humedad Elevada ")
 
-        if ("min-{}".format(sensor)=="min-humd_data".format(sensor)) and str(df_filtrado.min(skipna = True))<"60":
-            publish.single('2/alertahumd_data', "Humedad baja", hostname='52.22.75.246', client_id='alert')
-            #self.publicar("alerta-humd_data".format(sensor), "Humedad Muy Baja")
-
-     def analitica_predictiva(self):
+    def analitica_predictiva(self):
         self.regresion("temp_data")
         self.regresion("pres_data")
         self.regresion("humd_data")
